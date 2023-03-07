@@ -1,0 +1,109 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Concept {
+  A
+  B
+  C
+  D
+  E
+  F
+  O
+  UNDEFINED
+}
+
+model User {
+  id            String         @id @default(uuid())
+  email         String         @unique
+  password      String
+  username      String         @unique
+  ra            String
+  emailVerified Boolean        @default(false)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  posts         Post[]
+  Reply         Reply[]
+  SubjectScore  SubjectScore[]
+}
+
+model Post {
+  id        String   @id @default(uuid())
+  title     String
+  body      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  User      User     @relation(fields: [userId], references: [id])
+  userId    String
+  Reply     Reply[]
+}
+
+model Reply {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  body      String
+  User      User     @relation(fields: [userId], references: [id])
+  userId    String
+  Post      Post     @relation(fields: [postId], references: [id])
+  postId    String
+}
+
+model Professor {
+  id               String             @id @default(uuid())
+  name             String             @unique
+  email            String?            @unique
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  ProfessorSubject ProfessorSubject[]
+}
+
+model Subject {
+  id               String             @id @default(uuid())
+  name             String             @unique
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  ProfessorSubject ProfessorSubject[]
+}
+
+model ProfessorSubject {
+  Professor     Professor      @relation(fields: [professorId], references: [id])
+  professorId   String
+  Subject       Subject        @relation(fields: [subjectId], references: [id])
+  subjectId     String
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  SubjectScores SubjectScore[]
+
+  @@id([professorId, subjectId])
+  @@unique([professorId, subjectId])
+}
+
+model SubjectScore {
+  id                String              @id @default(uuid())
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  score             Concept
+  user              User                @relation(fields: [userId], references: [id])
+  userId            String
+  professorSubject  ProfessorSubject    @relation(fields: [professorId, subjectId], references: [professorId, subjectId])
+  professorId       String
+  subjectId         String
+  SubjectCommentary SubjectCommentary[]
+
+  @@unique([professorId, subjectId])
+}
+
+model SubjectCommentary {
+  id             String       @id @default(uuid())
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  body           String
+  subjectScore   SubjectScore @relation(fields: [subjectScoreId], references: [id])
+  subjectScoreId String
+}

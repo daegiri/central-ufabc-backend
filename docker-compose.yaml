@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  ufabc-db:
+    container_name: ufabc-db
+    image: postgres:alpine
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+      POSTGRES_DB: ufabc-db
+    networks:
+      - network
+    volumes:
+      - postgres:/data/postgres
+    restart: always
+
+  ufabc-pgadmin:
+    container_name: ufabc-pgadmin
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_PASSWORD: 1234
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+      PGADMIN_DEFAULT_EMAIL: pgadmin@pgadmin.com
+    volumes:
+      - pgadmin:/var/lib/pgadmin
+    ports:
+      - '5050:80'
+    networks:
+      - network
+    restart: always
+  ufabc-cache:
+    container_name: ufabc-cache
+    image: redis:alpine
+    networks:
+      - network
+    restart: always
+
+volumes:
+  postgres:
+  pgadmin:
+
+networks:
+  network:
+    driver: bridge
