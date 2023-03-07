@@ -1,3 +1,3 @@
 # api
 
-Projet to learn about sequelize and GraphQL.
+Projet to learn about prisma and GraphQL.
